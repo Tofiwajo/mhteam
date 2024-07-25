@@ -1,0 +1,109 @@
+/* Mwazzaf.scss */
+
+/* General container styling */
+.mwazzaf-container {
+    text-align: center;
+  }
+  
+  /* Table styling */
+  .table-container {
+    margin: auto;
+    border-collapse: collapse;
+    width: 80%;
+  }
+  
+  .table-container th,
+  .table-container td {
+    border: 1px solid black;
+    padding: 8px;
+  }
+  
+  /* Row styling based on estimation needed */
+  .table-container tr.yellow-row {
+    background-color: rgba(255, 255, 0, 0.568);
+  }
+  
+  .table-container tr.orange-row {
+    background-color: rgba(255, 166, 0, 0.678);
+  }
+  
+  /* Specific row styling for needed date within 3 days */
+  .table-container tr.red-row {
+    background-color: red !important;
+  }
+  
+  .table-container tr.blue-row {
+    background-color: rgba(0, 0, 255, 0.5) !important;
+  }
+  
+  /* DispatcherForm styling */
+  .form-container {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+  
+  .form-content {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .form-column {
+    flex: 1;
+    margin-right: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  .input-error {
+    border-color: red;
+  }
+  
+  .error-msg {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+  }
+  
+  .submit-button {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .submit-button:hover {
+    background-color: #45a049;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+  }
+   
