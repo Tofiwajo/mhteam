@@ -1,12 +1,11 @@
-// index.js
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client'; // Updated import for React 18
 import App from './App';
-import { UserProvider  } from './helpers/Mosta5demContext';
+import { UserProvider } from './helpers/Mosta5demContext';
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById('root')); // Create root instead of render
+root.render(
   <UserProvider>
     <App />
-  </UserProvider>,
-  document.getElementById('root')
+  </UserProvider>
 );

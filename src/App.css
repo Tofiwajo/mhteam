@@ -1,38 +1,194 @@
+@font-face {
+  font-family: myFont1;
+  src: url('Potra.ttf');
+}
+
+
+body{
+  margin: 0px;
+}
+
 .App {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; 
+  align-items: center;
+  height: 100vh;
   text-align: center;
+  background-image: url('background4.jpg');
+  background-size: cover;
+  font-family: sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+#actual-App{
+  background-color: white;
+  width: 50%;
+  height: 470px;
+  border-radius: 25px;
+  margin-bottom: 70px;
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  margin-top: 0px;
+
+}
+
+.input {
+  margin: 10px 0;
+  
+}
+
+input {
+  padding: 6px;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin-top: 8px; 
+  width: 450px;
+  box-sizing: border-box;
+  border-radius: 7px;
+  font-size: 20px;
+}
+
+h1{
+  font-family: myFont1;
+  font-size: 70px;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.input-text{
+  font-size: 23px;
+  font-weight: 350;
+  color: black;
+  margin-top: 20px;
+}
+#login{
+  width: 120px;
+  height: 50px;
+  font-size: 20px;
+  font-weight: 550;
+  border-radius: 5px;
+  background-color:  black;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+#login:hover {
+  background-color: white;
+  color:  black;
+  transition: all, 0.5s;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+#android{
+  font-size: 30px;
+  font-weight: 100;
+  margin-top: 75px;
+  margin-bottom: 20px;
+  color: black;
+}
+
+#download-button{
+  width: 180px;
+  height: 50px;
+  font-size: 20px;
+  font-weight: 550;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  background-color: black;
+  color:  white;
+}
+
+#download-button:hover {
+  background-color: white;
+  color:  black;
+  transition: all, 0.5s;
+}
+
+@media(max-width: 1016px){
+  .App {
+    height: 100vh;
   }
-  to {
-    transform: rotate(360deg);
+  
+  #actual-App{
+    width: 60%;
+    height: 470px;
+  }
+
+  input {
+    width: 65%;
+    font-size: 20px;
+  }
+  
+  h1{
+    font-size: 45px;
+  }
+  
+  .input-text{
+    font-size: 20px;
+    margin-top: 20px;
+  }
+  #login{
+    width: 120px;
+    height: 50px;
+    font-size: 17px;
+  }
+  
+
+  
+  #android{
+    font-size: 20px;
+    margin-top: 75px;
+    margin-bottom: 20px;
+  }
+  
+  #download-button{
+    width: 180px;
+    height: 50px;
+    font-size: 17px;
+  }
+  
+}
+
+@media(max-width:750px){
+  .App {
+    height: 700px;
+  }
+  
+  #actual-App{
+    width: 80%;
+    height: 430px;
+  }
+
+  input {
+    width: 90%;
+    font-size: 10px;
+  }
+  
+  h1{
+    font-size: 35px;
+  }
+  
+  .input-text{
+    font-size: 17px;
+    margin-top: 20px;
+  }
+  #login{
+    width: 80px;
+    height: 40px;
+    font-size: 12px;
+  }
+  
+
+  
+  #android{
+    font-size: 17px;
+    margin-top: 75px;
+    margin-bottom: 20px;
+  }
+  
+  #download-button{
+    width: 120px;
+    height: 40px;
+    font-size: 12px;
   }
 }
+

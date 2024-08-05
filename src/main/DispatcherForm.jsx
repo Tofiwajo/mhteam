@@ -1,184 +1,74 @@
-// src/components/DispatcherForm.jsx
+import React, { useEffect, useState } from 'react';
+import { db } from '../helpers/firebase';
+import { collection, getDocs, query, where, doc, setDoc } from 'firebase/firestore';
 
-import React, { useState, useEffect } from "react";
-import { collection, getDocs, addDoc } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL, listAll } from 'firebase/storage';
-import "./Sass/DispatcherForm.scss";
-import { db, storage } from '../helpers/firebase';
+const jobListCollection = collection(db, '2achghal');
 
-const DispatcherForm = ({ job, onClose, onSubmit }) => {
-  const [MwazzafData, setFormData] = useState({});
-  const [errors, setErrors] = useState({});
-  const [uploading, setUploading] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [thumbnails, setThumbnails] = useState([]);
-  const [expandedThumbnail, setExpandedThumbnail] = useState(null);
+const DispatcherForm = ({ job, currentMosta5dem }) => {
+  const [form, setForm] = useState({
+    estimScheduleData: {
+      estimScheduleTechName: '',
+      estimScheduleTechCon: '',
+      estimScheduleDate: '',
+      estimScheduleTime: '',
+      estimScheduleBy: '',
+      estimScheduleCost: ''
+    },
+    estimProcessingData: {
+      estimProcessingTechName: '',
+      estimProcessingTechCon: '',
+      estimProcessingDate: '',
+      estimProcessingTechCost: '',
+      estimProcessingPaymentAdress: '',
+      estimProcessingPaymentPicture: '',
+      estimProcessingTechDetails: ''
+    },
+    jobDoneScheduleData: {
+      jobDoneScheduleTechName: '',
+      jobDoneScheduleTechCon: '',
+      jobDoneScheduleDate: '',
+      jobDoneScheduleCost: '',
+      jobDoneScheduleTechHours: '',
+      jobDoneScheduleTechNum: '',
+      jobDoneScheduleMaterials: '',
+      jobDoneScheduleDetails: ''
+    },
+    jobDoneProcessingData: {
+      jobDoneProcessingCost: '',
+      jobDoneProcessingTechHours: '',
+      jobDoneProcessingTechNum: '',
+      jobDoneProcessingMaterials: '',
+      jobDoneProcessingSupliers: '',
+      jobDoneProcessingPaidBy: '',
+      jobDoneProcessingPaymentAdress: '',
+      jobDonePaymentPicture: '',
+      jobDoneProcessingBeforePictures: '',
+      jobDoneProcessingAfterPictures: '',
+      jobDoneProcessingSignOffPicture: '',
+      jobDoneProcessingDetails: ''
+    }
+  });
+
+  const [jobs, setJobs] = useState([]);
   const [technicians, setTechnicians] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredTechs, setFilteredTechs] = useState([]);
   const [techFound, setTechFound] = useState(false);
-
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [jobStatus, setjobStatus] = useState({});
   useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const jobs = await findWoForCurrentUser(currentMosta5dem);
+        setJobs(jobs);
+      } catch (e) {
+        console.error('Error fetching jobs:', e);
+      }
+    };
+
+    fetchJobs();
     fetchTechnicians();
-    if (job && job.data && job.data.MwazzafData) {
-      setFormData(job.data.MwazzafData || job.data.jobStatus);
-    }
-    fetchThumbnails();
-  }, [job]);
-
-  const renderSchedualJobDoneInputField = () => {
-    return (
-      <> <div className="form-row">
-      <div className="form-group">
-        <label>Technician Name</label>
-        <input
-          type="text"
-          value={MwazzafData.techName || ''}
-          onChange={handleTechNameChange}
-          placeholder="Enter Technician Name"
-          className={errors['techName'] ? "input-error" : ""}
-        />
-        {searchTerm && !techFound && (
-          <button type="button" onClick={handleAddTechnician} style={{ marginLeft: '10px' }}>+</button>
-        )}
-        {errors['techName'] && <span className="error-msg">{errors['techName']}</span>}
-      </div>
-      <div className="form-group">
-        <label>Technician Contact</label>
-        <input
-          type="text"
-          placeholder="Enter Technician Contact"
-          value={MwazzafData.techCon || ""}
-          onChange={handleTechContactChange}
-          className={errors['techCon'] ? "input-error" : ""}
-        />
-        {errors['techCon'] && <span className="error-msg">{errors['techCon']}</span>}
-      </div>
-    </div>
-        {renderInputField("Job Done Scheduled Date", "jobdonescheduledate")}
-        {renderInputField("Job Done Time", "jobDoneTime")}
-        {renderInputField("Job Done Tech Description", "jobDoneTechDescription")}
-      </>
-    );
-  };
-
-  const renderProcessingJobDoneInputField = () => {
-    return (
-      <>
-        {renderInputField("Job Done Cost", "jobDoneCost")}
-        {renderInputField("Job Done Paid By", "jobDonePaidby")}
-        {renderInputField("Job Done Payment Address", "jobDonePaymentAdress")}
-        <div className="form-group">
-          <label>Attach Job Done Pictures</label>
-          <input type="file" multiple onChange={handleFileChange} />
-        </div>
-      </>
-    );
-  };
-
-  const renderProcessingEstimInputField = () => {
-    return (
-      <>
-        {renderInputField("Estim Cost", "estimCost")}
-        {renderInputField("Estim Paid By", "estimPaidby")}
-        {renderInputField("Estim Payment Address", "estimPaymentAdress")}
-        <div className="form-group">
-          <label>Attach Estimation Pictures</label>
-          <input type="file" multiple onChange={handleFileChange} />
-        </div>
-      </>
-    );
-  };
-
-  const renderSchedualeEstimInputField = () => {
-    return (
-      <>
-         <div className="form-row">
-            <div className="form-group">
-              <label>Technician Name</label>
-              <input
-                type="text"
-                value={MwazzafData.techName || ''}
-                onChange={handleTechNameChange}
-                placeholder="Enter Technician Name"
-                className={errors['techName'] ? "input-error" : ""}
-              />
-              {searchTerm && !techFound && (
-                <button type="button" onClick={handleAddTechnician} style={{ marginLeft: '10px' }}>+</button>
-              )}
-              {errors['techName'] && <span className="error-msg">{errors['techName']}</span>}
-            </div>
-            <div className="form-group">
-              <label>Technician Contact</label>
-              <input
-                type="text"
-                placeholder="Enter Technician Contact"
-                value={MwazzafData.techCon || ""}
-                onChange={handleTechContactChange}
-                className={errors['techCon'] ? "input-error" : ""}
-              />
-              {errors['techCon'] && <span className="error-msg">{errors['techCon']}</span>}
-            </div>
-          </div>
-        {renderInputField("Estim Scheduled Date", "estimscheduleddate")}
-        {renderInputField("Estim Time", "estimscheduledtimee")}
-        {renderInputField("Estim Tech Description", "estimTechDescription")}
-      </>
-    );
-  };
-
-  const renderInputField = (label, field) => {
-    const isEstimation = job.data?.jobStatus === "estimationScheduled";
-    const isEstimationField = field.startsWith("estim");
-
-    if (isEstimation && isEstimationField) {
-      return (
-        <div className="form-group" key={field}>
-          <label>{label}</label>
-          <div className="input-container">
-            <input
-              type="text"
-              value={MwazzafData[field] || ""}
-              onChange={(e) => handleInputChange(e, field)}
-              className={errors[field] ? "input-error" : ""}
-              readOnly={field === "estimTechName" || field === "estimTechCon"}
-            />
-          </div>
-          {errors[field] && <span className="error-msg">{errors[field]}</span>}
-        </div>
-      );
-    } else {
-      return (
-        <div className="form-group" key={field}>
-          <label>{label}</label>
-          <div className="input-container">
-            <input
-              type="text"
-              value={MwazzafData[field] || ""}
-              onChange={(e) => handleInputChange(e, field)}
-              className={errors[field] ? "input-error" : ""}
-            />
-          </div>
-          {errors[field] && <span className="error-msg">{errors[field]}</span>}
-        </div>
-      );
-    }
-  };
-
-  const handleInputRendering = () => {
-    const jobState = job?.data?.jobStatus;
-
-    if (jobState === "estimationNeeded") {
-      return renderSchedualeEstimInputField();
-    } else if (jobState === "estimationScheduled") {
-      return renderProcessingEstimInputField();
-    } else if (jobState === "jobDoneNeeded") {
-      return renderSchedualJobDoneInputField();
-    } else if (jobState === "jobDonescheduled") {
-      return renderProcessingJobDoneInputField();
-    }
-    return null;
-  };
+  }, [currentMosta5dem]);
 
   const fetchTechnicians = async () => {
     try {
@@ -197,18 +87,24 @@ const DispatcherForm = ({ job, onClose, onSubmit }) => {
     const filtered = technicians.filter(tech => tech.techName.toLowerCase().includes(input.toLowerCase()));
     setFilteredTechs(filtered);
     if (filtered.length === 1 && filtered[0].techName.toLowerCase() === input.toLowerCase()) {
-      setFormData({
-        ...MwazzafData,
-        techName: filtered[0].techName,
-        techCon: filtered[0].techCon
-      });
+      setForm(prevForm => ({
+        ...prevForm,
+        estimScheduleData: {
+          ...prevForm.estimScheduleData,
+          estimScheduleTechName: filtered[0].techName,
+          estimScheduleTechCon: filtered[0].techCon
+        }
+      }));
       setTechFound(true);
     } else {
-      setFormData({
-        ...MwazzafData,
-        techName: input,
-        techCon: ''
-      });
+      setForm(prevForm => ({
+        ...prevForm,
+        estimScheduleData: {
+          ...prevForm.estimScheduleData,
+          estimScheduleTechName: input,
+          estimScheduleTechCon: ''
+        }
+      }));
       setTechFound(false);
     }
   };
@@ -219,180 +115,189 @@ const DispatcherForm = ({ job, onClose, onSubmit }) => {
     const filtered = technicians.filter(tech => tech.techCon.toLowerCase().includes(input.toLowerCase()));
     setFilteredTechs(filtered);
     if (filtered.length === 1 && filtered[0].techCon.toLowerCase() === input.toLowerCase()) {
-      setFormData({
-        ...MwazzafData,
-        techCon: filtered[0].techCon,
-        techName: filtered[0].techName,
-      });
+      setForm(prevForm => ({
+        ...prevForm,
+        estimScheduleData: {
+          ...prevForm.estimScheduleData,
+          estimScheduleTechCon: filtered[0].techCon,
+          estimScheduleTechName: filtered[0].techName
+        }
+      }));
       setTechFound(true);
     } else {
-      setFormData({
-        ...MwazzafData,
-        techCon: input,
-        techName: ''
-      });
+      setForm(prevForm => ({
+        ...prevForm,
+        estimScheduleData: {
+          ...prevForm.estimScheduleData,
+          estimScheduleTechCon: input,
+          estimScheduleTechName: ''
+        }
+      }));
       setTechFound(false);
     }
   };
 
-  const handleAddTechnician = async () => {
-    if (MwazzafData.techName && MwazzafData.techCon) {
-      try {
-        const techListCollection = collection(db, 'siyanjiye');
-        await addDoc(techListCollection, { techName: MwazzafData.techName, techCon: MwazzafData.techCon });
-        fetchTechnicians(); // Refresh technician list
-      } catch (error) {
-        console.error("Error adding technician:", error);
-      }
+  const findWoForCurrentUser = async (currentMosta5dem) => {
+    try {
+      const q1 = query(
+        jobListCollection,
+        where('assignedDispatcher', '==', currentMosta5dem)
+      );
+      const querySnapshot1 = await getDocs(q1);
+      const docs1 = querySnapshot1.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+      const q2 = query(
+        jobListCollection,
+        where('assignedManager', '==', currentMosta5dem)
+      );
+      const querySnapshot2 = await getDocs(q2);
+      const docs2 = querySnapshot2.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+      const combinedDocs = [...docs1, ...docs2];
+      const uniqueDocs = Array.from(new Set(combinedDocs.map(doc => doc.id)))
+        .map(id => combinedDocs.find(doc => doc.id === id));
+
+      return uniqueDocs;
+    } catch (e) {
+      console.error('Error finding jobs:', e);
+      throw e;
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value, dataset } = e.target;
+    if (dataset.section) {
+      setForm((prevForm) => ({
+        ...prevForm,
+        [dataset.section]: {
+          ...prevForm[dataset.section],
+          [name]: value
+        }
+      }));
     } else {
-      alert('Please provide both technician name and contact to add a new technician.');
+      setForm((prevForm) => ({
+        ...prevForm,
+        [name]: value
+      }));
     }
   };
 
-  const handleFileChange = (e) => {
-    setUploadedFiles(e.target.files);
-  };
+  const handleSubmit = async (e, section) => {
+    e.preventDefault();
+    setIsSubmitted(true);
+    setjobStatus(if (data.jobStatus= "estimationNeeded") {data.jobStatus= "estimationScheduled"}
+  elseif((if (data.jobStatus= "estimationScheduled") {data.jobStatus= "jobDoneNeeded"}
+  elseif((if (data.jobStatus= "jobDoneNeeded") {data.jobStatus= "jobDoneSchedule"}
+  elseif((if (data.jobStatus= "jobDoneSchedule") {data.jobStatus= "jobDoneSchedule"}
 
-  const fetchThumbnails = async () => {
-    if (!job) return;
+  )
 
-    const jobRef = ref(storage, `jobs/${job.data.jobId}`);
     try {
-      const result = await listAll(jobRef);
-      const urls = await Promise.all(result.items.map((item) => getDownloadURL(item)));
-      setThumbnails(urls);
-    } catch (error) {
-      console.error("Error fetching thumbnails:", error);
-    }
-  };
-
-  const handleInputChange = (e, field) => {
-    setFormData({
-      ...MwazzafData,
-      [field]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async () => {
-    setUploading(true);
-    if (job?.data?.jobStatus === "estimationNeeded") {
-      job.data.jobStatus = "estimationScheduled";
-    }
-
-    const uploadPromises = Array.from(uploadedFiles).map((file) => {
-      const fileRef = ref(storage, `jobs/${job.data.jobId}/${file.name}`);
-      return uploadBytesResumable(fileRef, file).then(() =>
-        getDownloadURL(fileRef)
-      );
-    });
-    try {
-      const fileUrls = await Promise.all(uploadPromises);
-      setFormData({
-        ...MwazzafData,
-        fileUrls,
+      await setDoc(doc(db, '2achghal', job.id), {
+        ...job.data,
+        [section]: form[section]
       });
-      onSubmit({ ...MwazzafData, fileUrls });
-    } catch (error) {
-      console.error("Error uploading files:", error);
-    } finally {
-      setUploading(false);
+      console.log('Document successfully written!');
+    } catch (e) {
+      console.error('Error writing document: ', e);
     }
   };
 
-  const handleSubmit2 = async () => {
-    setUploading(true);
-    if (job?.data?.jobStatus === "estimationScheduled") {
-      job.data.jobStatus = "jobDoneNeeded";
+  const renderJobData = () => {
+    if (!job || !job.data) {
+      return <div>No job data available</div>;
     }
 
-    const uploadPromises = Array.from(uploadedFiles).map((file) => {
-      const fileRef = ref(storage, `jobs/${job.data.jobId}/${file.name}`);
-      return uploadBytesResumable(fileRef, file).then(() =>
-        getDownloadURL(fileRef)
-      );
-    });
-    try {
-      const fileUrls = await Promise.all(uploadPromises);
-      setFormData({
-        ...MwazzafData,
-        fileUrls,
-      });
-      onSubmit({ ...MwazzafData, fileUrls });
-    } catch (error) {
-      console.error("Error uploading files:", error);
-    } finally {
-      setUploading(false);
-    }
-  };
+    const { data } = job;
 
-  const isEstimation = job?.data?.jobStatus === "estimationNeeded" || job?.data?.jobStatus === "estimationScheduled";
-
-  return (
-    <div className="dispatcher-form-container">
-      <div className="form-container">
-        <div className="job-details">
-          <p>
-            Hello there, we need someone for{" "}
-            <span className="highlight">{job?.data?.jobData?.trade}</span>
-            <br />
-            to: <span className="highlight">{job.data.jobData?.jobdescr}</span>
-            <br />
-            At: <span className="highlight">{job?.data?.jobData?.joblocation}</span>
-            <br />
-            Maximum by: <span className="highlight">{job?.data?.jobData?.neededdate}</span>
-            <br />
-            You guys do free estimation, right?
-            <br />
-            <span className="highlight">YES?</span> AWESOME!
-            <br />
-            <span className="highlight">No?</span> How much do you guys charge? The best I can do is:
-            <br />
-            <span className="highlight">
-              {job?.data?.jobData?.nte ? `${job.data.jobData.nte - 25}$` : ""}
-            </span>
-            <br />
-            <span className="highlight">No?</span> Ok ok give me a minute, I will ask my manager, I might be able to get you:
-            <br />
-            <span className="highlight">{job?.data?.jobData?.nte ? `${job.data.jobData.nte}$` : ""}</span>
-            <h3>WO# {job.data.woNum}</h3>
-          </p>
+    return (
+      <div>
+        <p>
+          Hello there, we need someone for{" "}
+          <span className="highlight">{data.trade}</span>
+          <br />
+          to: <span className="highlight">{data.jobdescr}</span>
+          <br />
+          At: <span className="highlight">{data.joblocation}</span>
+          <br />
+          Maximum by: <span className="highlight">{data.neededdate}</span>
+          <br />
+          You guys do free estimation, right?
+          <br />
+          <span className="highlight">YES?</span> AWESOME!
+          <br />
+          <span className="highlight">No?</span> How much do you guys charge? The best I can do is:
+          <br />
+          <span className="highlight">
+            {data.nte ? `$${data.nte - 25}$` : ""}
+          </span>
+          <br />
+          <span className="highlight">No?</span> Ok ok give me a minute, I will ask my manager, I might be able to get you:
+          <br />
+          <span className="highlight">{data.nte ? `$${data.nte}$` : ""}</span>
+          <h3>WO# {data.woNum}</h3>
+        </p>
+        <div>
+          <div> woNum: {data.woNum}, callerNumber: {data.callerNumber}, clientName: {data.clientName}, contact: {data.contact}, estimNeeded: {data.estimNeeded}, ivrNumb: {data.ivrNumb}, ivrcode: {data.ivrcode}, jobState: {data.jobStatus}, jobZip: {data.jobZip}, jobdescr: {data.jobdescr}, joblocation: {data.joblocation}, neededdate: {data.neededdate}, nte: {data.nte}</div>
+          <div> poNumb: {data.poNumb}, streetAddress: {data.streetAddress}, submdate: {data.submdate}, trade: {data.trade}, urgency: {data.urgency}, jobStatus: {data.jobStatus}, assignedBy: {data.assignedBy}, assignedManager: {data.assignedManager}, assignedTeamLeader: {data.assignedTeamLeader}, assignedDispatcher: {data.assignedDispatcher}</div>
         </div>
-        <div className="form-content">
-         
-          <div className="form-row">
-            {handleInputRendering()}
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Upload Pictures</label>
-              <input type="file" multiple onChange={handleFileChange} />
-            </div>
-          </div>
-          <div className="form-row thumbnails-row">
-            {thumbnails.map((url, index) => (
-              <div
-                key={index}
-                className={`thumbnail-container ${expandedThumbnail === url ? "expanded" : ""}`}
-                onClick={() => setExpandedThumbnail(url)}
-              >
-                <img src={url} alt={`Thumbnail ${index}`} className="thumbnail" />
-              </div>
-            ))}
-          </div>
+        <div>
+          <h3>Estimation Schedule</h3>
+          estimScheduleTechName: {data.estimScheduleData?.estimScheduleTechName}, estimScheduleTechCon: {data.estimScheduleData?.estimScheduleTechCon}, estimScheduleDate: {data.estimScheduleData?.estimScheduleDate}, estimScheduleTime: {data.estimScheduleData?.estimScheduleTime}, estimScheduleBy: {data.estimScheduleData?.estimScheduleBy}, estimScheduleCost: {data.estimScheduleData?.estimScheduleCost}
         </div>
-        <div className="button-container">
-          <button
-            className="button-primary"
-            onClick={isEstimation ? handleSubmit : handleSubmit2}
-            disabled={uploading}
-          >
-            {uploading ? "Uploading..." : "Submit"}
-          </button>
-          <button className="button-secondary" onClick={onClose}>
-            Cancel
-          </button>
+        <h3>Estimation Processing Data</h3>
+        <div>
+          estimProcessingTechName: {data.estimProcessingData?.estimProcessingTechName}, estimProcessingTechCon: {data.estimProcessingData?.estimProcessingTechCon}, estimProcessingDate: {data.estimProcessingData?.estimProcessingDate}, estimProcessingTechCost: {data.estimProcessingData?.estimProcessingTechCost}, estimProcessingPaymentAdress: {data.estimProcessingData?.estimProcessingPaymentAdress}, estimProcessingPaymentPicture: {data.estimProcessingData?.estimProcessingPaymentPicture}, estimProcessingTechDetails: {data.estimProcessingData?.estimProcessingTechDetails}
+        </div>
+        <h3>Job Done Schedule Data</h3>
+        <div>
+          jobDoneScheduleTechName: {data.jobDoneScheduleData?.jobDoneScheduleTechName}, jobDoneScheduleTechCon: {data.jobDoneScheduleData?.jobDoneScheduleTechCon}, jobDoneScheduleDate: {data.jobDoneScheduleData?.jobDoneScheduleDate}, jobDoneScheduleCost: {data.jobDoneScheduleData?.jobDoneScheduleCost}, jobDoneScheduleTechHours: {data.jobDoneScheduleData?.jobDoneScheduleTechHours}, jobDoneScheduleTechNum: {data.jobDoneScheduleData?.jobDoneScheduleTechNum}, jobDoneScheduleMaterials: {data.jobDoneScheduleData?.jobDoneScheduleMaterials}, jobDoneScheduleDetails: {data.jobDoneScheduleData?.jobDoneScheduleDetails}
+        </div>
+        <h3>Job Done Processing Data</h3>
+        <div>
+          jobDoneProcessingCost: {data.jobDoneProcessingData?.jobDoneProcessingCost}, jobDoneProcessingTechHours: {data.jobDoneProcessingData?.jobDoneProcessingTechHours}, jobDoneProcessingTechNum: {data.jobDoneProcessingData?.jobDoneProcessingTechNum}, jobDoneProcessingMaterials: {data.jobDoneProcessingData?.jobDoneProcessingMaterials}, jobDoneProcessingSupliers: {data.jobDoneProcessingData?.jobDoneProcessingSupliers}, jobDoneProcessingPaidBy: {data.jobDoneProcessingData?.jobDoneProcessingPaidBy}, jobDoneProcessingPaymentAdress: {data.jobDoneProcessingData?.jobDoneProcessingPaymentAdress}, jobDonePaymentPicture: {data.jobDoneProcessingData?.jobDonePaymentPicture}, jobDoneProcessingBeforePictures: {data.jobDoneProcessingData?.jobDoneProcessingBeforePictures}, jobDoneProcessingAfterPictures: {data.jobDoneProcessingData?.jobDoneProcessingAfterPictures}, jobDoneProcessingSignOffPicture: {data.jobDoneProcessingData?.jobDoneProcessingSignOffPicture}, jobDoneProcessingDetails: {data.jobDoneProcessingData?.jobDoneProcessingDetails}
         </div>
       </div>
+    );
+  };
+
+  const renderForm = (section, data) => (
+    <form onSubmit={(e) => handleSubmit(e, section)}>
+      <h2>{section.split(/(?=[A-Z])/).join(' ')}</h2>
+      {isSubmitted ? (
+        <div>Form submitted successfully!</div>
+      ) : (
+        <>
+          {Object.entries(data).map(([key, value]) => (
+            <div key={key}>
+              <input
+                type={key.includes('Date') ? 'date' : key.includes('Time') ? 'time' : key.includes('Cost') || key.includes('Hours') || key.includes('Num') ? 'number' : 'text'}
+                name={key}
+                data-section={section}
+                value={value}
+                onChange={handleChange}
+                placeholder={key.split(/(?=[A-Z])/).join(' ')}
+                required
+              />
+              {key.includes('Picture') && <input type="file" name={key} data-section={section} onChange={handleChange} />}
+            </div>
+          ))}
+          <button type="submit">Submit {section.split(/(?=[A-Z])/).join(' ')}</button>
+        </>
+      )}
+    </form>
+  );
+
+  return (
+    <div>
+      <div>
+        <h2>Job Data</h2>
+        {renderJobData()}
+      </div>
+      {job.data.jobStatus === 'estimationNeeded' && renderForm('estimScheduleData', form.estimScheduleData)}
+      {job.data.jobStatus === 'estimationScheduled' && renderForm('estimProcessingData', form.estimProcessingData)}
+      {job.data.jobStatus === 'jobDoneNeeded' && renderForm('jobDoneScheduleData', form.jobDoneScheduleData)}
+      {job.data.jobStatus === 'jobDoneScheduled' && renderForm('jobDoneProcessingData', form.jobDoneProcessingData)}
     </div>
   );
 };

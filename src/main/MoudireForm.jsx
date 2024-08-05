@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../helpers/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 const AddJobForm = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -28,7 +28,7 @@ const AddJobForm = ({ onClose, onSubmit }) => {
     assignedDispatcher: '',
     assignedEstimTech: '',
     assignedJobDoneTech: '',
-    jobId: '' // This will hold the ID of the selected user
+    jobId: '' // This will hold the ID of the new document in the collection 2achghal
   });
 
   const [users, setUsers] = useState([]);
@@ -57,11 +57,48 @@ const AddJobForm = ({ onClose, onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newJob = {
-      ...formData,
-      jobId: formData.jobId // Ensure jobId is included in the new job object
-    };
-    await onSubmit(newJob);
+    const jobData = { ...formData };
+
+    // Add a new document to the collection 2achghal
+    const docRef = await addDoc(collection(db, '2achghal'), jobData);
+
+    // Get the ID of the newly added document
+    const newJobId = docRef.id;
+
+    // Update the job document with the jobId
+    await updateDoc(doc(db, '2achghal', newJobId), { jobId: newJobId });
+
+    // Trigger the onSubmit callback with the updated job data
+    await onSubmit({ ...jobData, jobId: newJobId });
+
+    // Optionally, clear the form or perform any other necessary actions after submission
+    setFormData({
+      woNum: '',
+      callerNumber: '',
+      clientName: '',
+      contact: '',
+      estimNeeded: '',
+      ivrNumb: '',
+      ivrcode: '',
+      jobState: '',
+      jobZip: '',
+      jobdescr: '',
+      joblocation: '',
+      neededdate: '',
+      nte: '',
+      poNumb: '',
+      streetAddress: '',
+      submdate: '',
+      trade: '',
+      urgency: '',
+      jobStatus: '',
+      assignedBy: '',
+      assignedManager: '',
+      assignedDispatcher: '',
+      assignedEstimTech: '',
+      assignedJobDoneTech: '',
+      jobId: ''
+    });
   };
 
   return (
@@ -77,7 +114,7 @@ const AddJobForm = ({ onClose, onSubmit }) => {
           />
         </div>
       ))}
-      
+
       <div>
         <label>Select User:</label>
         <select name="jobId" onChange={handleUserChange} value={formData.jobId}>

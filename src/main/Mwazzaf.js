@@ -5,6 +5,7 @@ import TechList from './TechList';
 import zipcodes from 'zipcodes';
 import { db } from '../helpers/firebase';
 import { collection, getDocs, query, where, doc, updateDoc } from 'firebase/firestore';
+import './Mwazzaf.css';
 
 const jobListCollection = collection(db, '2achghal');
 
@@ -41,10 +42,12 @@ const Mwazzaf = ({ currentMosta5dem }) => {
   const [isWindowVisible, setIsWindowVisible] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [coordinates, setCoordinates] = useState([]);
-  const [selectedJob, setSelectedJob] = useState(null);
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const [clickedRowIndex, setClickedRowIndex] = useState(null);
-  const [isJobsTableVisible, setIsJobsTableVisible] = useState(true);
+  const [selectedJobNeeded, setSelectedJobNeeded] = useState(null);
+  const [selectedJobScheduled, setSelectedJobScheduled] = useState(null);
+  const [clickedRowIndexNeeded, setClickedRowIndexNeeded] = useState(null);
+  const [clickedRowIndexScheduled, setClickedRowIndexScheduled] = useState(null);
+  const [isJobsNeededTableVisible, setIsJobsNeededTableVisible] = useState(true);
+  const [isJobsScheduledTableVisible, setIsJobsScheduledTableVisible] = useState(true);
   const [isTechListVisible, setIsTechListVisible] = useState(false);
   const tableRef = useRef(null);
 
@@ -81,15 +84,21 @@ const Mwazzaf = ({ currentMosta5dem }) => {
     setCoordinates(coords);
   };
 
-  const handleRowClick = (job, index) => {
-    setSelectedJob(job);
-    setClickedRowIndex(index);
-    setIsFormVisible(true);
+  const handleRowClickNeeded = (job, index) => {
+    setSelectedJobNeeded(job);
+    setClickedRowIndexNeeded(index);
+  };
+
+  const handleRowClickScheduled = (job, index) => {
+    setSelectedJobScheduled(job);
+    setClickedRowIndexScheduled(index);
   };
 
   const handleCloseClick = () => {
-    setSelectedJob(null);
-    setIsFormVisible(false);
+    setSelectedJobNeeded(null);
+    setSelectedJobScheduled(null);
+    setClickedRowIndexNeeded(null);
+    setClickedRowIndexScheduled(null);
   };
 
   const handleOpenWindow = () => {
@@ -101,14 +110,14 @@ const Mwazzaf = ({ currentMosta5dem }) => {
   };
 
   const handleFormSubmit = async (formData) => {
-    if (!selectedJob) return;
+    if (!selectedJobNeeded && !selectedJobScheduled) return;
 
     try {
-      const jobDoc = doc(db, '2achghal', selectedJob.id);
-      await updateDoc(jobDoc, {formData, status: 'estimationScheduled' });
+      const jobDoc = doc(db, '2achghal', (selectedJobNeeded || selectedJobScheduled).id);
+      await updateDoc(jobDoc, { ...formData, jobStatus: 'estimationScheduled' });
       alert('Data updated successfully');
-      setSelectedJob(null);
-      setIsFormVisible(false);
+      handleCloseClick();
+      setJobs(prevJobs => prevJobs.map(job => job.id === (selectedJobNeeded || selectedJobScheduled).id ? { ...job, data: { ...job.data, ...formData, jobStatus: 'estimationScheduled' } } : job));
     } catch (e) {
       console.error('Error updating document: ', e);
       alert('Error updating data');
@@ -140,13 +149,17 @@ const Mwazzaf = ({ currentMosta5dem }) => {
       const rowElement = tableRows[jobIndex + 1];  // Adjust for header row
       if (rowElement) {
         rowElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        handleRowClick(jobs[jobIndex], jobIndex);
+        handleRowClickNeeded(jobs[jobIndex], jobIndex);
       }
     }
   };
 
-  const toggleJobsTableVisibility = () => {
-    setIsJobsTableVisible(!isJobsTableVisible);
+  const toggleJobsNeededTableVisibility = () => {
+    setIsJobsNeededTableVisible(!isJobsNeededTableVisible);
+  };
+
+  const toggleJobsScheduledTableVisibility = () => {
+    setIsJobsScheduledTableVisible(!isJobsScheduledTableVisible);
   };
 
   const handleTechListOpen = () => {
@@ -157,47 +170,65 @@ const Mwazzaf = ({ currentMosta5dem }) => {
     setIsTechListVisible(false);
   };
 
-  const countEstimationNeeded = jobs.filter(job => job.data.estimNeeded).length;
-  const countJobComplete = jobs.filter(job => !job.data.estimNeeded).length;
-  const countUrgentJobs = jobs.filter(job => {
-    const neededDate = new Date(job.data.neededdate);
-    const today = new Date();
-    const diffDays = Math.ceil((neededDate - today) / (1000 * 60 * 60 * 24));
-    return diffDays <= 5;
-  }).length;
-  const countTotalPending = jobs.length;
-
-  const thumbnailContainerStyle = {
-    display: 'inline-block',
-    margin: '5px',
-    transition: 'transform 0.3s ease',
-    cursor: 'pointer',
-  };
-
-  const thumbnailStyle = {
-    width: '50px',
-    height: '50px',
-    objectFit: 'cover',
+  const renderTableRows = (filterCondition, handleRowClick, selectedJob, clickedRowIndex) => {
+    return jobs
+      .filter(filterCondition)
+      .map((job, index) => (
+        <React.Fragment key={job.id}>
+          <tr
+            onClick={() => handleRowClick(job, index)}
+            style={getRowStyle(job)}
+          >
+            <td>{job.data.woNum}</td>
+            <td>{job.data.jobZip}</td>
+            <td>{job.data.joblocation}</td>
+            <td>{job.data.jobdescr}</td>
+            <td>{job.data.neededdate}</td>
+            <td>{job.data.submdate}</td>
+            <td>{job.data.estimNeeded ? "Yes" : "No"}</td>
+            <td>{job.data.nte}</td>
+            <td>
+              {job.data.fileURLs && Object.values(job.data.fileURLs).map((url, fileIndex) => (
+                <div key={fileIndex} style={{ display: 'inline-block', margin: '5px', transition: 'transform 0.3s ease', cursor: 'pointer' }}>
+                  <img
+                    src={url}
+                    alt={`File thumbnail ${fileIndex + 1}`}
+                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                    onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.5)'}
+                    onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  />
+                </div>
+              ))}
+            </td>
+          </tr>
+          {clickedRowIndex === index && (
+            <tr>
+              <td colSpan="9">
+                <DispatcherForm
+                  job={selectedJob}
+                  onClose={handleCloseClick}
+                  onSubmit={handleFormSubmit}
+                />
+              </td>
+            </tr>
+          )}
+        </React.Fragment>
+      ));
   };
 
   return (
-    <div>
-      <button onClick={handleTechListOpen} className="button-primary">+Tech</button>
+    <div id='body'>
       <MapComponent
         jobs={jobs}
         techs={coordinates}
         onJobClick={handleMapJobClick}
       />
       <div className="mwazzaf-container">
-        <h2 onClick={toggleJobsTableVisibility} className="toggle-heading" style={{ backgroundColor: 'lightblue', padding: '10px' }}>
+        <h2 onClick={toggleJobsNeededTableVisibility} className="toggle-heading">
           Jobs to Schedule
-          <span style={{ color: 'green' }}> - Estim Jobs: {countEstimationNeeded}</span>
-          <span style={{ color: 'blue' }}> | Job Complete: {countJobComplete}</span>
-          <span style={{ color: 'red' }}> | Urgent Jobs: {countUrgentJobs}</span>
-          <span style={{ color: 'purple' }}> | Total Pending: {countTotalPending}</span>
         </h2>
-        {isJobsTableVisible && (
-          <table className="table-container" ref={tableRef} style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
+        {isJobsNeededTableVisible && (
+          <table className="table-container" ref={tableRef}>
             <thead>
               <tr>
                 <th>WO#</th>
@@ -212,47 +243,44 @@ const Mwazzaf = ({ currentMosta5dem }) => {
               </tr>
             </thead>
             <tbody>
-              {jobs
-                .filter(job => job.data.jobStatus === 'estimationNeeded' || job.data.jobStatus === 'jobDoneNeeded')
-                .map((job, index) => (
-                  <React.Fragment key={job.id}> {/* Use unique job.id */}
-                  <tr
-                    onClick={() => handleRowClick(job, index)}
-                    style={getRowStyle(job)}
-                  >
-                    <td>{job.data.woNum}</td>
-                    <td>{job.data.jobZip}</td>
-                    <td>{job.data.joblocation}</td>
-                    <td>{job.data.jobdescr}</td>
-                    <td>{job.data.neededdate}</td>
-                    <td>{job.data.submdate}</td>
-                    <td>{job.data.estimNeeded ? "Yes" : "No"}</td>
-                    <td>{job.data.nte}</td>
-                    <td>
-                      {job.data.fileURLs && Object.values(job.data.fileURLs).map((url, fileIndex) => (
-                        <div key={fileIndex} style={thumbnailContainerStyle}>
-                          <img
-                            src={url}
-                            alt={`File thumbnail ${fileIndex + 1}`}
-                            style={thumbnailStyle}
-                            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.5)'}
-                            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                          />
-                        </div>
-                      ))}
-                    </td>
-                  </tr>
-                </React.Fragment>
-              ))}
+              {renderTableRows(
+                job => job.data.jobStatus === 'estimationNeeded' || job.data.jobStatus === 'jobDoneNeeded',
+                handleRowClickNeeded,
+                selectedJobNeeded,
+                clickedRowIndexNeeded
+              )}
             </tbody>
           </table>
         )}
-        {isFormVisible && selectedJob && (
-          <DispatcherForm
-            job={selectedJob}
-            onClose={handleCloseClick}
-            onSubmit={handleFormSubmit}
-          />
+      </div>
+      <div className="mwazzaf-container">
+        <h2 onClick={toggleJobsScheduledTableVisibility} className="toggle-heading">
+          Scheduled Jobs
+        </h2>
+        {isJobsScheduledTableVisible && (
+          <table className="table-container" ref={tableRef}>
+            <thead>
+              <tr>
+                <th>WO#</th>
+                <th>Zip Code</th>
+                <th>Job Location</th>
+                <th>Job Description</th>
+                <th>Needed Date</th>
+                <th>Submitted Date</th>
+                <th>Estimation Needed?</th>
+                <th>Budget</th>
+                <th>File</th>
+              </tr>
+            </thead>
+            <tbody>
+              {renderTableRows(
+                job => job.data.jobStatus === 'estimationScheduled' || job.data.jobStatus === 'jobDoneScheduled',
+                handleRowClickScheduled,
+                selectedJobScheduled,
+                clickedRowIndexScheduled
+              )}
+            </tbody>
+          </table>
         )}
       </div>
       {isTechListVisible && (

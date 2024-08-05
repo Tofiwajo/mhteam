@@ -4,6 +4,8 @@ import { db } from './helpers/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import Dashboard from './Dashboard';
 import { useUser } from './helpers/Mosta5demContext';
+import './App.css';
+   
 
 const App = () => {
   const [email, setEmail] = useState('');
@@ -51,25 +53,51 @@ const App = () => {
   }
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
-      <input
-        type="email"
-        placeholder="Enter email address"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={{ marginBottom: '10px', padding: '10px', width: '300px' }}
-      />
-      <input
-        type="password"
-        placeholder="Enter password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={{ marginBottom: '10px', padding: '10px', width: '300px' }}
-      />
-      <button onClick={handleLogin} style={{ padding: '10px 20px' }}>
-        Let's Go
-      </button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div className="App">
+    <header className="App-header">
+        <h1>Management Helpdesk Team</h1>
+      </header>
+
+
+      <div id="actual-App">
+
+      <div className="input">
+
+
+
+        <div className="input-text">Enter your Email:</div>
+        <input required type="email"
+            placeholder="Enter email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+        />
+      
+
+
+        <div className="input-text">Password:</div>
+        <input required type="password"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+        />
+      
+    
+      </div>
+
+
+
+      <div>
+        <button id='login' onClick={handleLogin}>Log in</button>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+      </div>
+
+
+      
+      <div id="android">Download our Android App</div>
+      <button id="download-button">Download APK</button>
+      </div>
+
+
     </div>
   );
 };

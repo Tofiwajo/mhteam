@@ -6,7 +6,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet.markercluster';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import 'leaflet-control-geocoder';
-import { geocodeAddress } from './geocode';
+import { geocodeAddress } from '../helpers/geocode';
 import jobsIcon from '../main/Icons/Jobs.jpg';
 import techIcon from '../main/Icons/Technichian.png';
 

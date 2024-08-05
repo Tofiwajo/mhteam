@@ -1,9 +1,11 @@
-// Dashboard.js
 import React, { useState, useEffect } from 'react';
+import Manager from './main/Manager';
 import Moudir from './main/Moudir';
 import Mwazzaf from './main/Mwazzaf';
 import TechList from './main/TechList';
 import { useUser } from './helpers/Mosta5demContext';
+import './Dashboard.css'
+
 
 const Dashboard = () => {
   const {
@@ -42,24 +44,42 @@ const Dashboard = () => {
   }
 
   return (
-    <div style={{ textAlign: 'center', padding: '20px' }}>
-      <p style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>
+    <div id='Column'>
+    <div id="navbar">
+      <div id='navbarTitle'>
         Welcome {currentMosta5demName} {currentMosta5demLastName}
-      </p>
-      <button onClick={handleLeave} style={{ marginBottom: '20px', padding: '10px 20px' }}>
-        Leave
-      </button>
-      <div style={{ marginBottom: '20px' }}>
-        <button onClick={() => handleComponentToggle('Moudir')} style={{ margin: '5px' }}>
-          Toggle Moudir
-        </button>
-        <button onClick={() => handleComponentToggle('Mwazzaf')} style={{ margin: '5px' }}>
-          Toggle Mwazzaf
-        </button>
-        <button onClick={() => handleComponentToggle('TechList')} style={{ margin: '5px' }}>
-          Toggle TechList
-        </button>
       </div>
+      <div className='flexItem'>
+
+      <button className='btn' onClick={() => handleComponentToggle('Manager')}>
+        Manager
+      </button>
+
+      <button className='btn' onClick={() => handleComponentToggle('Moudir')}>
+        Admin
+      </button>
+
+      <button className='btn' onClick={() => handleComponentToggle('Mwazzaf')}>
+        Jobs Proccessing
+      </button>
+      
+
+      <button className='btn' onClick={() => handleComponentToggle('TechList')}>
+       Technicians
+      </button>
+
+      <button id='leavebtn' onClick={handleLeave}>
+        Sign out
+      </button>
+      </div>
+      </div>
+      
+      <div id='content'>
+      {visibleComponent === 'Manager' && (
+        <Manager
+          currentMosta5dem={currentMosta5dem}
+        />
+      )}
       {visibleComponent === 'Moudir' && (
         <Moudir
           currentMosta5dem={currentMosta5dem}
@@ -75,6 +95,8 @@ const Dashboard = () => {
           onClose={() => handleComponentToggle('none')}
         />
       )}
+      </div>
+    
     </div>
   );
 };

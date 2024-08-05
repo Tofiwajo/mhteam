@@ -1,0 +1,52 @@
+#navbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #333;
+}
+
+
+.flexItem{
+    display: flex;
+    justify-content: flex-end;
+}
+
+#Column{
+    display: flex;
+    flex-direction: column;
+}
+
+
+#content{
+    flex: 1;
+    margin: 0px;
+    padding: 0px;
+}
+
+
+#navbarTitle{
+    font-size: 27px;
+    font-family: sans-serif;
+    color: white;
+    font-weight: 500;
+}
+
+
+#leavebtn{
+    border-color: red;
+    color: red;
+    width: 100px;
+    height: 35px;
+    border-radius: 7px;
+    font-size: 17px;
+}
+
+
+.btn{
+    font-size: 17px;
+    width: 150px;
+    height: 35px;
+    border-radius: 7px;
+    margin-right: 10px;
+}

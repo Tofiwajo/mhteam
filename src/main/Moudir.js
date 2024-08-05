@@ -6,31 +6,50 @@ import PhoneListModal from './PhoneListModal';
 
 const Moudir = ({ currentMosta5dem }) => {
   const [form, setForm] = useState({
-    woNum: '',
-    callerNumber: '',
-    clientName: '',
-    contact: '',
-    estimNeeded: false,
-    ivrNumb: '',
-    ivrcode: '',
-    jobState: '',
-    jobZip: '',
-    jobdescr: '',
-    joblocation: '',
-    neededdate: '',
-    nte: '',
-    poNumb: '',
-    streetAddress: '',
-    submdate: '',
-    trade: '',
-    urgency: '',
-    jobId: '',
-    jobStatus: '',
-    assignedBy: '',
-    assignedManager: '',
-    assignedDispatcher: '',
-    assignedEstimTech: ''
-  });
+   
+    estimScheduleData:{ 
+      estimScheduleTechName:"",
+      estimScheduleTechCon:"",
+      estimScheduleDate:"",
+      estimScheduleTime:"",
+      estimScheduleBy:"",
+      estimScheduleCost:"",
+    },
+    estimProcessingData:{
+      estimProcessingTechName:"",
+      estimProcessingTechCon:"",
+      estimProcessingDate:"",
+      estimProcessingTechCost:"",
+      estimProcessingPaymentAdress:"",
+      estimProcessingPaymentPicture:"",
+      estimProcessingTechDetails:"",
+    },
+    jobDoneScheduleData:{
+      jobDoneScheduleTechName:"",
+      jobDoneScheduleTechCon:"",
+      jobDoneScheduleDate:"",
+      jobDoneScheduleCost:"",
+      jobDoneScheduleTechHours:"",
+      jobDoneScheduleTechNum:"",
+      jobDoneScheduleMaterials:"",
+      jobDoneScheduleDetails:"",
+    },
+    jobDoneProcessingData:{
+      jobDoneProcessingCost:"",
+      jobDoneProcessingTechHours:"",
+      jobDoneProcessingTechNum:"",
+      jobDoneProcessingMaterials:"",
+      jobDoneProcessingSupliers:"",
+      jobDoneProcessingPaidBy:"",
+      jobDoneProcessingPaymentAdress:"",
+      jobDonePaymentPicture:"",
+      jobDoneProcessingBeforePictures:"",
+      jobDoneProcessingAfterPictures:"",
+      jobDoneProcessingSignOffPicture:"",
+      jobDoneProcessingDetails:"",
+
+    } 
+   });
   const [jobs, setJobs] = useState([]);
   const [managers, setManagers] = useState([]);
   const [dispatchers, setDispatchers] = useState([]);
@@ -132,8 +151,48 @@ const Moudir = ({ currentMosta5dem }) => {
       assignedBy: '',
       assignedManager: '',
       assignedDispatcher: '',
-      assignedEstimTech: ''
-    });
+    },{estimScheduleData:{ 
+      estimScheduleTechName:"",
+      estimScheduleTechCon:"",
+      estimScheduleDate:"",
+      estimScheduleTime:"",
+      estimScheduleBy:"",
+      estimScheduleCost:"",
+    }},{
+    estimProcessingData:{
+      estimProcessingTechName:"",
+      estimProcessingTechCon:"",
+      estimProcessingDate:"",
+      estimProcessingTechCost:"",
+      estimProcessingPaymentAdress:"",
+      estimProcessingPaymentPicture:"",
+      estimProcessingTechDetails:"",
+    }},{
+    jobDoneScheduleData:{
+      jobDoneScheduleTechName:"",
+      jobDoneScheduleTechCon:"",
+      jobDoneScheduleDate:"",
+      jobDoneScheduleCost:"",
+      jobDoneScheduleTechHours:"",
+      jobDoneScheduleTechNum:"",
+      jobDoneScheduleMaterials:"",
+      jobDoneScheduleDetails:"",
+    }},{
+    jobDoneProcessingData:{
+      jobDoneProcessingCost:"",
+      jobDoneProcessingTechHours:"",
+      jobDoneProcessingTechNum:"",
+      jobDoneProcessingMaterials:"",
+      jobDoneProcessingSupliers:"",
+      jobDoneProcessingPaidBy:"",
+      jobDoneProcessingPaymentAdress:"",
+      jobDonePaymentPicture:"",
+      jobDoneProcessingBeforePictures:"",
+      jobDoneProcessingAfterPictures:"",
+      jobDoneProcessingSignOffPicture:"",
+      jobDoneProcessingDetails:"",
+
+    }});
     setFiles([]);
 
     // Refresh job list
@@ -193,7 +252,7 @@ const Moudir = ({ currentMosta5dem }) => {
               className={job.data.estimNeeded ? 'yellow-row' : 'orange-row'}
             >
               <td>{job.data.woNum}</td>
-              <td>{job.data.jobZip}</td>
+              <td>{job.data.jobZip}</td> 
               <td>{job.data.joblocation}</td>
               <td>{job.data.jobdescr}</td>
               <td>{job.data.neededdate}</td>
@@ -241,8 +300,6 @@ const Moudir = ({ currentMosta5dem }) => {
           <input name="submdate" value={form.submdate} onChange={handleChange} placeholder="Submit Date" />
           <input name="trade" value={form.trade} onChange={handleChange} placeholder="Trade" />
           <input name="urgency" value={form.urgency} onChange={handleChange} placeholder="Urgency" />
-          <input name="jobId" value={form.jobId} onChange={handleChange} placeholder="Job ID" />
-          <input name="jobStatus" value={form.jobStatus} onChange={handleChange} placeholder="Job Status" />
           <select name="assignedManager" value={form.assignedManager} onChange={handleChange}>
             <option value="">Select Manager</option>
             {managers.map(manager => (

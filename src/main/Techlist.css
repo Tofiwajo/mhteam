@@ -1,0 +1,93 @@
+
+
+
+#body{
+    font-family: sans-serif;
+    background-color: gray;
+    margin: 0px;
+}
+
+.title{
+    margin: auto;
+    text-align: center;
+    color: white;
+    font-size: 45px;
+    font-weight: 100;
+    padding-top: 30px;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-top: 0px;
+}
+
+
+.fromCon{
+    display: grid;
+    place-items: center;
+}
+
+
+.form-group{
+    margin: 20px;
+}
+
+form{
+    background-color: white;
+    padding:100px 400px;
+    border-radius: 35px;
+    margin: 50px;
+}
+
+.label{
+    font-size: 20px;
+    text-align: left;
+}
+
+input{
+    width: 400px;
+    height: 35px;
+    
+}
+
+textarea{
+    width: 440px;
+}
+
+select{
+    width: 200px;
+    height: 35px;
+}
+
+.button-primary{
+    font-size: 20px;
+    width: 70px;
+    padding: 7px;
+    border-radius: 5px;
+}
+
+.button-secondary{
+    font-size: 20px;
+    width: 100px;
+    padding: 7px;
+    border-radius: 5px;
+}
+
+
+
+.button-secondary:hover{
+    color: rgb(255, 66, 19);
+    border-color: rgb(255, 66, 19);
+    transition: all, 0.2s;
+}
+
+.button-primary:hover{
+    color: rgb(12, 238, 12);
+    border-color: rgb(12, 238, 12);
+    transition: all, 0.2s;
+}
+
+.button-group{
+    display: flex;
+}
+
+.btn{
+    flex: 1;
+}
