@@ -1,9 +1,29 @@
+// frontend
+
 import React, { useState, useEffect } from 'react';
 import { db, storage } from '../helpers/firebase';
 import { collection, addDoc, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import PhoneListModal from './PhoneListModal';
 
+function PdfImport() {
+    const [text, setText] = useState('');
+
+    useEffect(() => {
+        fetch('/fetch-emails')
+            .then(response => response.json())
+            .then(data => setText(data.text))
+            .catch(error => console.error('Error fetching email text:', error));
+    }, []);
+
+    return (
+        <div>
+            <h1>Email PDF Text Extraction</h1>
+            <pre>{text}</pre>
+        </div>
+    );
+}
+PdfImport();
 const Moudir = ({ currentMosta5dem }) => {
   const [form, setForm] = useState({
    
@@ -35,6 +55,8 @@ const Moudir = ({ currentMosta5dem }) => {
       jobDoneScheduleDetails:"",
     },
     jobDoneProcessingData:{
+      jobDoneProcessingTechName:"",
+      jobDoneProcessingTechCon:"",
       jobDoneProcessingCost:"",
       jobDoneProcessingTechHours:"",
       jobDoneProcessingTechNum:"",
@@ -150,6 +172,7 @@ const Moudir = ({ currentMosta5dem }) => {
       jobStatus: '',
       assignedBy: '',
       assignedManager: '',
+      assignedTeamLeader:"",
       assignedDispatcher: '',
     },{estimScheduleData:{ 
       estimScheduleTechName:"",
@@ -212,8 +235,8 @@ const Moudir = ({ currentMosta5dem }) => {
   };
 
   const thumbnailStyle = {
-    width: '60px',
-    height: '60px',
+    width: '50px',
+    height: '50px',
     objectFit: 'cover',
     borderRadius: '4px',
     transition: 'transform 0.3s ease',
@@ -230,7 +253,7 @@ const Moudir = ({ currentMosta5dem }) => {
     <div>
       <button onClick={() => setIsModalOpen(true)}>+</button>
       <button onClick={() => document.getElementById('addJobForm').style.display = 'block'}>+</button>
-      <PhoneListModal isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} />
+      <button onClick={() => PdfImport}>PDF</button>
       <table className="table-container" style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
         <thead>
           <tr>

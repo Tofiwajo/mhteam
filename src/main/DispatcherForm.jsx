@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../helpers/firebase';
 import { collection, getDocs, query, where, doc, setDoc } from 'firebase/firestore';
+import './DispatcherForm.css';
 
 const jobListCollection = collection(db, '2achghal');
 
@@ -34,6 +35,8 @@ const DispatcherForm = ({ job, currentMosta5dem }) => {
       jobDoneScheduleDetails: ''
     },
     jobDoneProcessingData: {
+      jobDoneProcessingTechName: '',
+      jobDoneProcessingTechCon: '',
       jobDoneProcessingCost: '',
       jobDoneProcessingTechHours: '',
       jobDoneProcessingTechNum: '',
@@ -55,7 +58,7 @@ const DispatcherForm = ({ job, currentMosta5dem }) => {
   const [filteredTechs, setFilteredTechs] = useState([]);
   const [techFound, setTechFound] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [jobStatus, setjobStatus] = useState({});
+
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -185,17 +188,27 @@ const DispatcherForm = ({ job, currentMosta5dem }) => {
   const handleSubmit = async (e, section) => {
     e.preventDefault();
     setIsSubmitted(true);
-    setjobStatus(if (data.jobStatus= "estimationNeeded") {data.jobStatus= "estimationScheduled"}
-  elseif((if (data.jobStatus= "estimationScheduled") {data.jobStatus= "jobDoneNeeded"}
-  elseif((if (data.jobStatus= "jobDoneNeeded") {data.jobStatus= "jobDoneSchedule"}
-  elseif((if (data.jobStatus= "jobDoneSchedule") {data.jobStatus= "jobDoneSchedule"}
 
-  )
+    const updatedJobStatus = (() => {
+      switch (job.data.jobStatus) {
+        case 'estimationNeeded':
+          return 'estimationScheduled';
+        case 'estimationScheduled':
+          return 'jobDoneNeeded';
+        case 'jobDoneNeeded':
+          return 'jobDoneScheduled';
+        case 'jobDoneScheduled':
+          return 'jobFinalize';
+        default:
+          return job.data.jobStatus;
+      }
+    })();
 
     try {
       await setDoc(doc(db, '2achghal', job.id), {
         ...job.data,
-        [section]: form[section]
+        [section]: form[section],
+        jobStatus: updatedJobStatus
       });
       console.log('Document successfully written!');
     } catch (e) {
@@ -211,16 +224,20 @@ const DispatcherForm = ({ job, currentMosta5dem }) => {
     const { data } = job;
 
     return (
-      <div>
+      <div className="job-data-container">
         <p>
-          Hello there, we need someone for{" "}
+          Hello there, we need someone for
+          {" "}
           <span className="highlight">{data.trade}</span>
           <br />
-          to: <span className="highlight">{data.jobdescr}</span>
+          to: <span className="highlight">
+            {data.jobdescr}</span>
           <br />
-          At: <span className="highlight">{data.joblocation}</span>
+          At: <span className="highlight">
+            {data.joblocation}</span>
           <br />
-          Maximum by: <span className="highlight">{data.neededdate}</span>
+          Maximum by: <span className="highlight">
+            {data.neededdate}</span>
           <br />
           You guys do free estimation, right?
           <br />
@@ -237,25 +254,184 @@ const DispatcherForm = ({ job, currentMosta5dem }) => {
           <span className="highlight">{data.nte ? `$${data.nte}$` : ""}</span>
           <h3>WO# {data.woNum}</h3>
         </p>
-        <div>
-          <div> woNum: {data.woNum}, callerNumber: {data.callerNumber}, clientName: {data.clientName}, contact: {data.contact}, estimNeeded: {data.estimNeeded}, ivrNumb: {data.ivrNumb}, ivrcode: {data.ivrcode}, jobState: {data.jobStatus}, jobZip: {data.jobZip}, jobdescr: {data.jobdescr}, joblocation: {data.joblocation}, neededdate: {data.neededdate}, nte: {data.nte}</div>
-          <div> poNumb: {data.poNumb}, streetAddress: {data.streetAddress}, submdate: {data.submdate}, trade: {data.trade}, urgency: {data.urgency}, jobStatus: {data.jobStatus}, assignedBy: {data.assignedBy}, assignedManager: {data.assignedManager}, assignedTeamLeader: {data.assignedTeamLeader}, assignedDispatcher: {data.assignedDispatcher}</div>
+        <div className="job-details">
+          <div className="job-detail-row">
+            <span className="label">WO Number:</span> <span>{data.woNum}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Caller Number:</span> <span>{data.callerNumber}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Client Name:</span> <span>{data.clientName}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Contact:</span> <span>{data.contact}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Estimation Needed:</span> <span>{data.estimNeeded}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">IVR Number:</span> <span>{data.ivrNumb}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">IVR Code:</span> <span>{data.ivrcode}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Job Status:</span> <span>{data.jobStatus}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Job Zip:</span> <span>{data.jobZip}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Job Description:</span> <span>{data.jobdescr}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Job Location:</span> <span>{data.joblocation}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Needed Date:</span> <span>{data.neededdate}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">NTE:</span> <span>{data.nte}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">PO Number:</span> <span>{data.poNumb}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Street Address:</span> <span>{data.streetAddress}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Submission Date:</span> <span>{data.submdate}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Trade:</span> <span>{data.trade}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Urgency:</span> <span>{data.urgency}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Assigned By:</span> <span>{data.assignedBy}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Assigned Manager:</span> <span>{data.assignedManager}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Assigned Team Leader:</span> <span>{data.assignedTeamLeader}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Assigned Dispatcher:</span> <span>{data.assignedDispatcher}</span>
+          </div>
         </div>
-        <div>
+        <div className="section">
           <h3>Estimation Schedule</h3>
-          estimScheduleTechName: {data.estimScheduleData?.estimScheduleTechName}, estimScheduleTechCon: {data.estimScheduleData?.estimScheduleTechCon}, estimScheduleDate: {data.estimScheduleData?.estimScheduleDate}, estimScheduleTime: {data.estimScheduleData?.estimScheduleTime}, estimScheduleBy: {data.estimScheduleData?.estimScheduleBy}, estimScheduleCost: {data.estimScheduleData?.estimScheduleCost}
+          <div className="job-detail-row">
+            <span className="label">Tech Name:</span> <span>{data.estimScheduleData?.estimScheduleTechName}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Tech Contact:</span> <span>{data.estimScheduleData?.estimScheduleTechCon}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Date:</span> <span>{data.estimScheduleData?.estimScheduleDate}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Time:</span> <span>{data.estimScheduleData?.estimScheduleTime}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Scheduled By:</span> <span>{data.estimScheduleData?.estimScheduleBy}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Cost:</span> <span>{data.estimScheduleData?.estimScheduleCost}</span>
+          </div>
         </div>
-        <h3>Estimation Processing Data</h3>
-        <div>
-          estimProcessingTechName: {data.estimProcessingData?.estimProcessingTechName}, estimProcessingTechCon: {data.estimProcessingData?.estimProcessingTechCon}, estimProcessingDate: {data.estimProcessingData?.estimProcessingDate}, estimProcessingTechCost: {data.estimProcessingData?.estimProcessingTechCost}, estimProcessingPaymentAdress: {data.estimProcessingData?.estimProcessingPaymentAdress}, estimProcessingPaymentPicture: {data.estimProcessingData?.estimProcessingPaymentPicture}, estimProcessingTechDetails: {data.estimProcessingData?.estimProcessingTechDetails}
+        <div className="section">
+          <h3>Estimation Processing Data</h3>
+          <div className="job-detail-row">
+            <span className="label">Tech Name:</span> <span>{data.estimProcessingData?.estimProcessingTechName}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Tech Contact:</span> <span>{data.estimProcessingData?.estimProcessingTechCon}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Date:</span> <span>{data.estimProcessingData?.estimProcessingDate}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Tech Cost:</span> <span>{data.estimProcessingData?.estimProcessingTechCost}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Payment Address:</span> <span>{data.estimProcessingData?.estimProcessingPaymentAdress}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Payment Picture:</span> <span>{data.estimProcessingData?.estimProcessingPaymentPicture}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Tech Details:</span> <span>{data.estimProcessingData?.estimProcessingTechDetails}</span>
+          </div>
         </div>
-        <h3>Job Done Schedule Data</h3>
-        <div>
-          jobDoneScheduleTechName: {data.jobDoneScheduleData?.jobDoneScheduleTechName}, jobDoneScheduleTechCon: {data.jobDoneScheduleData?.jobDoneScheduleTechCon}, jobDoneScheduleDate: {data.jobDoneScheduleData?.jobDoneScheduleDate}, jobDoneScheduleCost: {data.jobDoneScheduleData?.jobDoneScheduleCost}, jobDoneScheduleTechHours: {data.jobDoneScheduleData?.jobDoneScheduleTechHours}, jobDoneScheduleTechNum: {data.jobDoneScheduleData?.jobDoneScheduleTechNum}, jobDoneScheduleMaterials: {data.jobDoneScheduleData?.jobDoneScheduleMaterials}, jobDoneScheduleDetails: {data.jobDoneScheduleData?.jobDoneScheduleDetails}
+        <div className="section">
+          <h3>Job Done Schedule Data</h3>
+          <div className="job-detail-row">
+            <span className="label">Tech Name:</span> <span>{data.jobDoneScheduleData?.jobDoneScheduleTechName}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Tech Contact:</span> <span>{data.jobDoneScheduleData?.jobDoneScheduleTechCon}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Date:</span> <span>{data.jobDoneScheduleData?.jobDoneScheduleDate}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Cost:</span> <span>{data.jobDoneScheduleData?.jobDoneScheduleCost}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Tech Hours:</span> <span>{data.jobDoneScheduleData?.jobDoneScheduleTechHours}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Tech Number:</span> <span>{data.jobDoneScheduleData?.jobDoneScheduleTechNum}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Materials:</span> <span>{data.jobDoneScheduleData?.jobDoneScheduleMaterials}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Details:</span> <span>{data.jobDoneScheduleData?.jobDoneScheduleDetails}</span>
+          </div>
         </div>
-        <h3>Job Done Processing Data</h3>
-        <div>
-          jobDoneProcessingCost: {data.jobDoneProcessingData?.jobDoneProcessingCost}, jobDoneProcessingTechHours: {data.jobDoneProcessingData?.jobDoneProcessingTechHours}, jobDoneProcessingTechNum: {data.jobDoneProcessingData?.jobDoneProcessingTechNum}, jobDoneProcessingMaterials: {data.jobDoneProcessingData?.jobDoneProcessingMaterials}, jobDoneProcessingSupliers: {data.jobDoneProcessingData?.jobDoneProcessingSupliers}, jobDoneProcessingPaidBy: {data.jobDoneProcessingData?.jobDoneProcessingPaidBy}, jobDoneProcessingPaymentAdress: {data.jobDoneProcessingData?.jobDoneProcessingPaymentAdress}, jobDonePaymentPicture: {data.jobDoneProcessingData?.jobDonePaymentPicture}, jobDoneProcessingBeforePictures: {data.jobDoneProcessingData?.jobDoneProcessingBeforePictures}, jobDoneProcessingAfterPictures: {data.jobDoneProcessingData?.jobDoneProcessingAfterPictures}, jobDoneProcessingSignOffPicture: {data.jobDoneProcessingData?.jobDoneProcessingSignOffPicture}, jobDoneProcessingDetails: {data.jobDoneProcessingData?.jobDoneProcessingDetails}
+        <div className="section">
+          <h3>Job Done Processing Data</h3>
+          <div className="job-detail-row">
+            <span className="label">Cost:</span> <span>{data.jobDoneProcessingData?.jobDoneProcessingCost}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Tech Hours:</span> <span>{data.jobDoneProcessingData?.jobDoneProcessingTechHours}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Tech Number:</span> <span>{data.jobDoneProcessingData?.jobDoneProcessingTechNum}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Materials:</span> <span>{data.jobDoneProcessingData?.jobDoneProcessingMaterials}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Suppliers:</span> <span>{data.jobDoneProcessingData?.jobDoneProcessingSupliers}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Paid By:</span> <span>{data.jobDoneProcessingData?.jobDoneProcessingPaidBy}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Payment Address:</span> <span>{data.jobDoneProcessingData?.jobDoneProcessingPaymentAdress}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Payment Picture:</span> <span>{data.jobDoneProcessingData?.jobDonePaymentPicture}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Before Pictures:</span> <span>{data.jobDoneProcessingData?.jobDoneProcessingBeforePictures}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">After Pictures:</span> <span>{data.jobDoneProcessingData?.jobDoneProcessingAfterPictures}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Sign-Off Picture:</span> <span>{data.jobDoneProcessingData?.jobDoneProcessingSignOffPicture}</span>
+          </div>
+          <div className="job-detail-row">
+            <span className="label">Details:</span> <span>{data.jobDoneProcessingData?.jobDoneProcessingDetails}</span>
+          </div>
         </div>
       </div>
     );
@@ -269,7 +445,7 @@ const DispatcherForm = ({ job, currentMosta5dem }) => {
       ) : (
         <>
           {Object.entries(data).map(([key, value]) => (
-            <div key={key}>
+            <div key={key} className="form-group">
               <input
                 type={key.includes('Date') ? 'date' : key.includes('Time') ? 'time' : key.includes('Cost') || key.includes('Hours') || key.includes('Num') ? 'number' : 'text'}
                 name={key}
@@ -289,7 +465,7 @@ const DispatcherForm = ({ job, currentMosta5dem }) => {
   );
 
   return (
-    <div>
+    <div className="dispatcher-form">
       <div>
         <h2>Job Data</h2>
         {renderJobData()}

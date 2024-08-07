@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import DispatcherForm from './DispatcherForm';
+import DispatcherForm from '../main/DispatcherForm';
 import MapComponent from './MapComponent';
 import TechList from './TechList';
 import zipcodes from 'zipcodes';

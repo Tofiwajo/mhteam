@@ -1,0 +1,24 @@
+
+.job-data-container {
+    text-align: center;
+    background-color: #9e9e9e;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .job-details {
+    text-align: center;
+    background-color: #e6f7ff;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .section {
+    text-align: center;
+    background-color: #fffbe6;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
